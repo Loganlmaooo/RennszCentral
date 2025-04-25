@@ -31,7 +31,11 @@ async function sendDiscordLog(action: string, details: string, category: string)
           },
           {
             name: "Timestamp",
-            value: new Date().toISOString(),
+            value: new Date().toLocaleString("en-US", {
+              timeZone: "America/New_York",
+              dateStyle: "medium",
+              timeStyle: "medium"
+            }),
             inline: true
           }
         ],

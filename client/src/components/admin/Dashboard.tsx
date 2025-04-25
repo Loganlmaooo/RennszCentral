@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { 
-  FaEye, FaUserPlus, FaChartLine, 
+  FaEye, FaChartLine, 
   FaPlusCircle, FaStream, FaPalette, FaCog, 
   FaUserEdit, FaBullhorn, FaVideo 
 } from "react-icons/fa";
@@ -12,11 +12,49 @@ import { useTheme } from "@/hooks/useTheme";
 export default function Dashboard() {
   const { logs } = useAdmin();
   const { setActiveSection } = useAdmin();
-  const [stats, setStats] = useState({
-    totalViews: 24521,
-    newFollowers: 1204,
-    engagementRate: "32.7%"
+  const [websiteStats, setWebsiteStats] = useState({
+    totalViews: 0,
+    increase: 0
   });
+  
+  // Use localStorage to track page views (this is a simplified approach for demo purposes)
+  // In a real application, you would use server-side tracking and analytics
+  useEffect(() => {
+    const getPageViews = () => {
+      // Get the current month and the previous month
+      const now = new Date();
+      const currentMonth = `${now.getFullYear()}-${now.getMonth() + 1}`;
+      const lastMonth = `${now.getFullYear()}-${now.getMonth()}`;
+      
+      // Get stored views
+      const storedViews = localStorage.getItem('pageViews') ? 
+        JSON.parse(localStorage.getItem('pageViews') || '{}') : {};
+      
+      // If there's no entry for the current month, create one
+      if (!storedViews[currentMonth]) {
+        storedViews[currentMonth] = 0;
+      }
+      
+      // Increment view count for current month
+      storedViews[currentMonth] += 1;
+      
+      // Store back in localStorage
+      localStorage.setItem('pageViews', JSON.stringify(storedViews));
+      
+      // Calculate increase percentage
+      const lastMonthViews = storedViews[lastMonth] || 0;
+      const currentMonthViews = storedViews[currentMonth];
+      const increase = lastMonthViews > 0 ? 
+        ((currentMonthViews - lastMonthViews) / lastMonthViews) * 100 : 0;
+      
+      return {
+        totalViews: currentMonthViews,
+        increase: increase
+      };
+    };
+    
+    setWebsiteStats(getPageViews());
+  }, []);
   
   const recentLogs = logs?.slice(0, 3) || [];
   
@@ -63,52 +101,37 @@ export default function Dashboard() {
     <div>
       <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 gap-6 mb-8">
         <div className="glass p-6 rounded-lg">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-gray-400">Total Views</p>
-              <h3 className="text-2xl font-bold mt-1">{stats.totalViews.toLocaleString()}</h3>
+              <p className="text-gray-400">Website Visits</p>
+              <h3 className="text-2xl font-bold mt-1">{websiteStats.totalViews.toLocaleString()}</h3>
             </div>
             <span className="text-[#D4AF37] text-2xl">
               <FaEye />
             </span>
           </div>
           <div className="mt-4 text-sm">
-            <span className="text-green-500"><FaChartLine className="inline mr-1" />12%</span>
-            <span className="text-gray-400 ml-1">from last month</span>
-          </div>
-        </div>
-        
-        <div className="glass p-6 rounded-lg">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-gray-400">New Followers</p>
-              <h3 className="text-2xl font-bold mt-1">{stats.newFollowers.toLocaleString()}</h3>
-            </div>
-            <span className="text-[#9146FF] text-2xl">
-              <FaUserPlus />
-            </span>
-          </div>
-          <div className="mt-4 text-sm">
-            <span className="text-green-500"><FaChartLine className="inline mr-1" />8%</span>
-            <span className="text-gray-400 ml-1">from last month</span>
-          </div>
-        </div>
-        
-        <div className="glass p-6 rounded-lg">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-gray-400">Engagement Rate</p>
-              <h3 className="text-2xl font-bold mt-1">{stats.engagementRate}</h3>
-            </div>
-            <span className="text-blue-400 text-2xl">
-              <FaChartLine />
-            </span>
-          </div>
-          <div className="mt-4 text-sm">
-            <span className="text-red-500"><FaChartLine className="inline mr-1 transform rotate-180" />3%</span>
-            <span className="text-gray-400 ml-1">from last month</span>
+            {websiteStats.increase > 0 ? (
+              <>
+                <span className="text-green-500">
+                  <FaChartLine className="inline mr-1" />
+                  {websiteStats.increase.toFixed(1)}%
+                </span>
+                <span className="text-gray-400 ml-1">from last month</span>
+              </>
+            ) : websiteStats.increase < 0 ? (
+              <>
+                <span className="text-red-500">
+                  <FaChartLine className="inline mr-1 transform rotate-180" />
+                  {Math.abs(websiteStats.increase).toFixed(1)}%
+                </span>
+                <span className="text-gray-400 ml-1">from last month</span>
+              </>
+            ) : (
+              <span className="text-gray-400">First month of tracking</span>
+            )}
           </div>
         </div>
       </div>
