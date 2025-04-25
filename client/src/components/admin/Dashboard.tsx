@@ -1,91 +1,60 @@
 import { useState, useEffect } from "react";
-import { 
-  FaEye, FaChartLine, 
-  FaPlusCircle, FaStream, FaPalette, FaCog, 
-  FaUserEdit, FaBullhorn, FaVideo 
-} from "react-icons/fa";
+import { FaEye, FaChartLine, FaPlusCircle, FaStream, FaPalette, FaCog, FaUserEdit, FaBullhorn, FaVideo } from "react-icons/fa";
 import { useAdmin } from "@/hooks/useAdmin";
-import { useAnnouncements } from "@/hooks/useAnnouncements";
-import { useStreams } from "@/hooks/useStreams";
 import { useTheme } from "@/hooks/useTheme";
 
 export default function Dashboard() {
   const { logs } = useAdmin();
   const { setActiveSection } = useAdmin();
+  const [websiteTitle, setWebsiteTitle] = useState(() =>
+    localStorage.getItem('websiteTitle') || 'My Website'
+  );
   const [websiteStats, setWebsiteStats] = useState({
     totalViews: 0,
     increase: 0
   });
-  
-  // Use localStorage to track page views (this is a simplified approach for demo purposes)
-  // In a real application, you would use server-side tracking and analytics
+
+  // Quick action to update website title
+  const updateWebsiteTitle = () => {
+    localStorage.setItem('websiteTitle', websiteTitle);
+    document.title = websiteTitle;
+  };
+
   useEffect(() => {
+    document.title = websiteTitle;
     const getPageViews = () => {
-      // Get the current month and the previous month
       const now = new Date();
       const currentMonth = `${now.getFullYear()}-${now.getMonth() + 1}`;
       const lastMonth = `${now.getFullYear()}-${now.getMonth()}`;
-      
-      // Get stored views
-      const storedViews = localStorage.getItem('pageViews') ? 
+
+      const storedViews = localStorage.getItem('pageViews') ?
         JSON.parse(localStorage.getItem('pageViews') || '{}') : {};
-      
-      // If there's no entry for the current month, create one
+
       if (!storedViews[currentMonth]) {
         storedViews[currentMonth] = 0;
       }
-      
-      // Increment view count for current month
+
       storedViews[currentMonth] += 1;
-      
-      // Store back in localStorage
       localStorage.setItem('pageViews', JSON.stringify(storedViews));
-      
-      // Calculate increase percentage
+
       const lastMonthViews = storedViews[lastMonth] || 0;
       const currentMonthViews = storedViews[currentMonth];
-      const increase = lastMonthViews > 0 ? 
+      const increase = lastMonthViews > 0 ?
         ((currentMonthViews - lastMonthViews) / lastMonthViews) * 100 : 0;
-      
+
       return {
         totalViews: currentMonthViews,
         increase: increase
       };
     };
-    
+
     setWebsiteStats(getPageViews());
   }, []);
-  
-  const recentLogs = logs?.slice(0, 3) || [];
-  
-  const formatLogMessage = (log: any) => {
-    switch(log.category) {
-      case "theme":
-        return `Updated site theme to ${log.details}`;
-      case "announcement":
-        return `Posted new announcement: "${log.details}"`;
-      case "stream":
-        return `Changed featured stream to ${log.details}`;
-      default:
-        return log.action;
-    }
-  };
-  
-  const getIconForLog = (category: string) => {
-    switch(category) {
-      case "theme":
-        return <FaUserEdit className="text-white" />;
-      case "announcement":
-        return <FaBullhorn className="text-white" />;
-      case "stream":
-        return <FaVideo className="text-white" />;
-      default:
-        return <FaCog className="text-white" />;
-    }
-  };
-  
+
+  const recentLogs = logs?.slice(0, 5) || [];
+
   const getColorForLog = (category: string) => {
-    switch(category) {
+    switch (category) {
       case "theme":
         return "bg-blue-500";
       case "announcement":
@@ -96,11 +65,31 @@ export default function Dashboard() {
         return "bg-gray-500";
     }
   };
-  
+
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-      
+    <div className="space-y-8">
+      {/* Website Title Settings */}
+      <div className="bg-gray-800 p-6 rounded-lg">
+        <h2 className="text-xl font-semibold mb-4 gold-gradient">Website Settings</h2>
+        <div className="flex gap-4">
+          <input
+            type="text"
+            value={websiteTitle}
+            onChange={(e) => setWebsiteTitle(e.target.value)}
+            className="flex-1 bg-gray-700 border border-gray-600 rounded px-4 py-2"
+            placeholder="Website Title"
+          />
+          <button
+            onClick={updateWebsiteTitle}
+            className="bg-[#D4AF37] text-black px-4 py-2 rounded hover:bg-[#C4A027]"
+          >
+            Update Title
+          </button>
+        </div>
+      </div>
+
+      {/* Website Statistics */}
       <div className="grid grid-cols-1 gap-6 mb-8">
         <div className="glass p-6 rounded-lg">
           <div className="flex items-start justify-between">
@@ -135,49 +124,49 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      
-      <div className="glass p-6 rounded-lg mb-8">
-        <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button 
+
+      {/* Quick Actions */}
+      <div className="bg-gray-800 p-6 rounded-lg">
+        <h2 className="text-xl font-semibold mb-4 gold-gradient">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <button
             onClick={() => setActiveSection("announcements")}
-            className="p-4 bg-gray-800 rounded hover:bg-gray-700 transition-colors flex flex-col items-center justify-center text-center"
+            className="p-4 bg-gray-700 rounded-lg hover:bg-gray-600 text-left"
           >
-            <FaPlusCircle className="text-2xl mb-2 text-[#D4AF37]" />
-            <span>New Announcement</span>
+            <h3 className="font-medium mb-2">New Announcement</h3>
+            <p className="text-sm text-gray-400">Create and publish a new announcement</p>
           </button>
-          <button 
+
+          <button
             onClick={() => setActiveSection("streams")}
-            className="p-4 bg-gray-800 rounded hover:bg-gray-700 transition-colors flex flex-col items-center justify-center text-center"
+            className="p-4 bg-gray-700 rounded-lg hover:bg-gray-600 text-left"
           >
-            <FaStream className="text-2xl mb-2 text-[#9146FF]" />
-            <span>Change Stream</span>
+            <h3 className="font-medium mb-2">Manage Streams</h3>
+            <p className="text-sm text-gray-400">Update stream settings and channels</p>
           </button>
-          <button 
+
+          <button
             onClick={() => setActiveSection("themes")}
-            className="p-4 bg-gray-800 rounded hover:bg-gray-700 transition-colors flex flex-col items-center justify-center text-center"
+            className="p-4 bg-gray-700 rounded-lg hover:bg-gray-600 text-left"
           >
-            <FaPalette className="text-2xl mb-2 text-blue-400" />
-            <span>Update Theme</span>
-          </button>
-          <button className="p-4 bg-gray-800 rounded hover:bg-gray-700 transition-colors flex flex-col items-center justify-center text-center">
-            <FaCog className="text-2xl mb-2 text-gray-400" />
-            <span>Site Settings</span>
+            <h3 className="font-medium mb-2">Theme Settings</h3>
+            <p className="text-sm text-gray-400">Customize website appearance</p>
           </button>
         </div>
       </div>
-      
-      <div className="glass p-6 rounded-lg">
-        <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
+
+      {/* Recent Activity */}
+      <div className="bg-gray-800 p-6 rounded-lg">
+        <h2 className="text-xl font-semibold mb-4 gold-gradient">Recent Activity</h2>
         <div className="space-y-4">
           {recentLogs.length > 0 ? (
             recentLogs.map((log, index) => (
               <div key={index} className="flex items-start">
                 <div className={`${getColorForLog(log.category)} rounded-full p-2 mr-4`}>
-                  {getIconForLog(log.category)}
+                  {/* Icon would go here -  Consider adding icons based on log.category */}
                 </div>
                 <div>
-                  <p className="font-medium">{formatLogMessage(log)}</p>
+                  <p className="font-medium">{log.message}</p>
                   <p className="text-sm text-gray-400 mt-1">
                     Admin • {new Date(log.timestamp).toLocaleString()}
                   </p>
