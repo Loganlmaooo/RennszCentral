@@ -1,5 +1,6 @@
+
 import { useEffect, useState, useRef } from "react";
-import { FaTwitch, FaDiscord, FaBroadcastTower, FaUser, FaBullhorn } from "react-icons/fa";
+import { FaTwitch, FaDiscord, FaBroadcastTower, FaBullhorn, FaExchangeAlt } from "react-icons/fa";
 import { useStreams } from "@/hooks/useStreams";
 import { useAnnouncements } from "@/hooks/useAnnouncements";
 import { format } from "date-fns";
@@ -7,7 +8,7 @@ import { format } from "date-fns";
 export function HeroSection() {
   const { streamSettings, streamChannels, streamStatus } = useStreams();
   const { featuredAnnouncement } = useAnnouncements();
-  const [featuredChannel, setFeaturedChannel] = useState<string | null>(null);
+  const [activeStream, setActiveStream] = useState<string | null>(null);
   
   useEffect(() => {
     if (streamSettings && streamChannels) {
@@ -18,18 +19,26 @@ export function HeroSection() {
         );
         
         if (liveChannel) {
-          setFeaturedChannel(liveChannel[0]);
+          setActiveStream(liveChannel[0]);
           return;
         }
       }
       
       // Fallback to configured featured channel
-      setFeaturedChannel(streamSettings.featuredChannel);
+      setActiveStream(streamSettings.featuredChannel);
     }
   }, [streamSettings, streamChannels, streamStatus]);
   
-  const currentLiveStatus = featuredChannel && streamStatus?.[featuredChannel];
+  const currentLiveStatus = activeStream && streamStatus?.[activeStream];
   const formattedDate = featuredAnnouncement ? format(new Date(featuredAnnouncement.date), 'MMMM d, yyyy') : '';
+  
+  const toggleStream = () => {
+    if (!streamChannels || streamChannels.length < 2) return;
+    
+    const currentIndex = streamChannels.findIndex(channel => channel.name === activeStream);
+    const nextIndex = (currentIndex + 1) % streamChannels.length;
+    setActiveStream(streamChannels[nextIndex].name);
+  };
   
   return (
     <section id="home" className="min-h-[80vh] flex items-center relative overflow-hidden">
@@ -68,7 +77,7 @@ export function HeroSection() {
             
             {/* Live Indicator */}
             <div className="mt-8 flex items-center">
-              {featuredChannel && (
+              {activeStream && (
                 <>
                   <span className="flex items-center">
                     <span className="flex h-3 w-3 relative mr-2">
@@ -85,20 +94,16 @@ export function HeroSection() {
                       {currentLiveStatus?.isLive ? 'LIVE' : 'OFFLINE'}
                     </span>
                   </span>
-                  <span className="mx-3 text-gray-400">|</span>
-                  <span className="text-gray-300">
-                    <FaUser className="inline mr-1" /> {currentLiveStatus?.viewers || '--'}
-                  </span>
                 </>
               )}
             </div>
           </div>
           
-          <div className="lg:w-3/5 glass rounded-lg overflow-hidden gold-border h-96 md:h-[500px] w-full">
-            {featuredChannel ? (
+          <div className="lg:w-3/5 glass rounded-lg overflow-hidden gold-border h-96 md:h-[500px] w-full relative">
+            {activeStream ? (
               currentLiveStatus?.isLive ? (
                 <iframe 
-                  src={`https://player.twitch.tv/?channel=${featuredChannel}&parent=${window.location.hostname}&autoplay=true&muted=true`}
+                  src={`https://player.twitch.tv/?channel=${activeStream}&parent=${window.location.hostname}&autoplay=true&muted=true`}
                   width="100%"
                   height="100%"
                   frameBorder="0"
@@ -120,6 +125,17 @@ export function HeroSection() {
                   <p className="text-gray-400">Loading stream...</p>
                 </div>
               </div>
+            )}
+            
+            {/* Stream Switch Button */}
+            {streamChannels && streamChannels.length > 1 && (
+              <button
+                onClick={toggleStream}
+                className="absolute top-4 right-4 bg-gray-800 bg-opacity-80 p-2 rounded-full hover:bg-gray-700 transition-all"
+                title="Switch Stream"
+              >
+                <FaExchangeAlt className="text-white" />
+              </button>
             )}
           </div>
         </div>
