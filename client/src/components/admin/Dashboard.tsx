@@ -106,7 +106,7 @@ export default function Dashboard() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-gray-400">Website Visits</p>
-              <h3 className="text-2xl font-bold mt-1">{websiteStats.totalViews.toLocaleString()}</h3>
+              <h3 className="text-2xl font-bold mt-1">{websiteStats.totalViews ? websiteStats.totalViews.toLocaleString() : "0"}</h3>
             </div>
             <span className="text-[#D4AF37] text-2xl">
               <FaEye />
