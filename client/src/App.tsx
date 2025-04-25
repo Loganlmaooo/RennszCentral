@@ -1,5 +1,5 @@
 import { Switch, Route } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -8,6 +8,36 @@ import AllAnnouncements from "@/pages/AllAnnouncements";
 import AnnouncementDetail from "@/pages/AnnouncementDetail";
 import { Layout } from "@/components/Layout";
 import { useTheme } from "@/hooks/useTheme";
+import { useAdmin } from "@/hooks/useAdmin";
+import AdminLogin from "@/components/admin/AdminLogin";
+import AdminPanel from "@/components/admin/AdminPanel";
+
+// Admin page component
+function AdminPage() {
+  const { isAuthenticated } = useAdmin();
+  const [showLoginModal, setShowLoginModal] = useState(true);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+
+  return (
+    <>
+      {/* Admin Login Modal */}
+      <AdminLogin 
+        isOpen={showLoginModal && !isAuthenticated} 
+        onClose={() => window.location.href = "/"}
+        onSuccess={() => {
+          setShowLoginModal(false);
+          setShowAdminPanel(true);
+        }}
+      />
+      
+      {/* Admin Panel */}
+      <AdminPanel 
+        isOpen={showAdminPanel || isAuthenticated} 
+        onClose={() => window.location.href = "/"}
+      />
+    </>
+  );
+}
 
 function Router() {
   return (
@@ -15,6 +45,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/announcements" component={AllAnnouncements} />
       <Route path="/announcements/:id" component={AnnouncementDetail} />
+      <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
   );
