@@ -648,6 +648,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to get logs" });
     }
   });
+  
+  // Backup system routes
+  app.post("/api/system/backup", authenticate, async (req, res) => {
+    try {
+      const { createBackup } = await import('./backup');
+      const backupPath = await createBackup();
+      
+      await logActivity(
+        "Manual Backup", 
+        `Admin created manual backup: ${backupPath}`, 
+        "system",
+        req.session.adminId as number
+      );
+      
+      res.json({ 
+        message: "Backup created successfully", 
+        backupPath 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create backup" });
+    }
+  });
+  
+  app.post("/api/system/restore", authenticate, async (req, res) => {
+    try {
+      const { getLatestBackup, restoreFromBackup } = await import('./backup');
+      const latestBackup = getLatestBackup();
+      
+      if (!latestBackup) {
+        return res.status(404).json({ message: "No backup found" });
+      }
+      
+      await restoreFromBackup(latestBackup);
+      
+      await logActivity(
+        "Manual Restore", 
+        `Admin triggered manual restore from backup: ${latestBackup}`, 
+        "system",
+        req.session.adminId as number
+      );
+      
+      res.json({ 
+        message: "System restored successfully", 
+        backupUsed: latestBackup 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to restore system" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
