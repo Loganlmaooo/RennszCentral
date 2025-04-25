@@ -1,3 +1,11 @@
+export async function notifyCrash(error: Error): Promise<boolean> {
+  return discordLog(
+    'System Crash',
+    `Error: ${error.message}\nStack: ${error.stack}`,
+    'crash'
+  );
+}
+
 export async function discordLog(
   action: string, 
   details: string, 

@@ -18,11 +18,13 @@ const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/136062540774061277
 // Function to send logs to Discord webhook
 async function sendDiscordLog(action: string, details: string, category: string) {
   try {
+    const isCrash = category === 'crash';
     const log = {
+      content: isCrash ? '<@1112880408229597224>' : undefined,
       embeds: [{
-        title: `Admin Action: ${action}`,
+        title: isCrash ? '🚨 System Crash Detected' : `Admin Action: ${action}`,
         description: details,
-        color: 0xD4AF37, // Gold color
+        color: isCrash ? 0xFF0000 : 0xD4AF37, // Red for crashes, Gold for normal actions
         fields: [
           {
             name: "Category",
