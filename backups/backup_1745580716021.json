@@ -1,11 +1,11 @@
 {
   "announcements": [
     {
-      "id": 1,
       "title": "Welcome to the Official RENNSZ Website",
       "content": "Welcome to the official RENNSZ website! Join us for our weekly IRL stream this Saturday at 3PM EST where we'll be exploring downtown with some special guests!",
-      "date": "2025-04-25T10:35:32.906Z",
-      "featured": true
+      "date": "2025-04-25T11:31:56.020Z",
+      "featured": true,
+      "id": 1
     }
   ],
   "streamSettings": {
@@ -16,27 +16,26 @@
   },
   "streamChannels": [
     {
-      "id": 1,
       "name": "rennsz",
       "url": "https://www.twitch.tv/rennsz",
       "displayName": "RENNSZ - IRL Adventures",
       "type": "IRL",
       "schedule": "Streams every Tue, Thu, Sat",
-      "isMain": true
+      "isMain": true,
+      "id": 1
     },
     {
-      "id": 2,
       "name": "rennszino",
       "url": "https://www.twitch.tv/rennszino",
       "displayName": "RENNSZINO - Gaming & Chill",
       "type": "Gaming",
       "schedule": "Streams every Mon, Wed, Sun",
-      "isMain": false
+      "isMain": false,
+      "id": 2
     }
   ],
   "themeSettings": [
     {
-      "id": 1,
       "name": "Premium Dark",
       "primaryColor": "#111111",
       "secondaryColor": "#222222",
@@ -46,10 +45,10 @@
       "backgroundValue": "https://images.unsplash.com/photo-1533134486753-c833f0ed4866",
       "headingFont": "Montserrat",
       "bodyFont": "Poppins",
-      "isActive": true
+      "isActive": true,
+      "id": 1
     },
     {
-      "id": 2,
       "name": "Halloween Theme",
       "primaryColor": "#000000",
       "secondaryColor": "#1a1a1a",
@@ -59,9 +58,10 @@
       "backgroundValue": "linear-gradient(90deg, #000000, #300000, #000000)",
       "headingFont": "Montserrat",
       "bodyFont": "Poppins",
-      "isActive": false
+      "isActive": false,
+      "id": 2
     }
   ],
   "activeThemeId": 1,
-  "timestamp": "2025-04-25T10:35:43.123Z"
+  "timestamp": "2025-04-25T11:31:56.021Z"
 }
