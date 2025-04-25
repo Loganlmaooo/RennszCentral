@@ -3,6 +3,44 @@ import { log } from './vite';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import axios from 'axios';
+
+async function sendDiscordLog(action: string, details: string, category: string) {
+  const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1360625407740612771/2NBUC4S-X55I6FgdE-FMOwJWJ-XHRGtG_o2Q23EuU_XHzJKmy4xjx6IEsVpjYUxuQt4Z";
+  
+  try {
+    const log = {
+      embeds: [{
+        title: `System Backup: ${action}`,
+        description: details,
+        color: 0x00FF00,
+        fields: [
+          {
+            name: "Category",
+            value: category,
+            inline: true
+          },
+          {
+            name: "Timestamp",
+            value: new Date().toLocaleString("en-US", {
+              timeZone: "America/New_York",
+              dateStyle: "medium",
+              timeStyle: "medium"
+            }),
+            inline: true
+          }
+        ],
+        footer: {
+          text: "RENNSZ Admin Panel - Backup System"
+        }
+      }]
+    };
+    
+    await axios.post(DISCORD_WEBHOOK_URL, log);
+  } catch (error) {
+    console.error("Failed to send Discord webhook:", error);
+  }
+}
 
 // Get current file path for ESM modules (replacement for __dirname)
 const __filename = fileURLToPath(import.meta.url);
@@ -30,6 +68,13 @@ interface BackupData {
 // Create a backup of the current state
 async function createBackup(): Promise<string> {
   try {
+    // Send notification that backup is starting
+    await sendDiscordLog(
+      'Backup Initiated',
+      'Starting system backup process',
+      'system'
+    );
+
     // Get all data
     const announcements = await storage.getAnnouncements();
     const streamSettings = await storage.getStreamSettings();
@@ -119,6 +164,12 @@ async function restoreFromBackup(backupPath: string): Promise<void> {
     const backupData: BackupData = JSON.parse(backupJson);
     
     log(`Restoring from backup: ${path.basename(backupPath)}`, 'backup');
+    
+    await sendDiscordLog(
+      'Backup Restoration',
+      `Restoring system from backup file: ${path.basename(backupPath)}`,
+      'system'
+    );
     
     // Create an activity log entry about the restoration
     await storage.createLog({
