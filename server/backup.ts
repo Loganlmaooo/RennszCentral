@@ -194,15 +194,20 @@ function initBackupSystem(): void {
   // Schedule backup process every 5 minutes
   log(`Initializing automated backup system with ${BACKUP_INTERVAL / 60000} minute interval`, 'backup');
   
-  // Create initial backup
+  // Check for recovery on startup
   setTimeout(async () => {
     try {
+      const latestBackup = getLatestBackup();
+      if (latestBackup) {
+        await restoreFromBackup(latestBackup);
+        log('Recovered from latest backup on startup', 'backup');
+      }
       await createBackup();
       log('Initial backup created', 'backup');
     } catch (error) {
-      log(`Error creating initial backup: ${error}`, 'backup');
+      log(`Error during startup recovery/backup: ${error}`, 'backup');
     }
-  }, 10000); // Initial backup after 10 seconds
+  }, 10000); // Recovery and initial backup after 10 seconds
   
   // Set up recurring backup cycle
   setInterval(async () => {
